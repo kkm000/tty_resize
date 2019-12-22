@@ -1,0 +1,63 @@
+tty_resize (neé resize)
+=======================
+
+This is a little and fast standalone utility based on old X sources that reads
+current tty size from the terminal emulator and synchronizes the width and
+height currently set in the system with the TIOCGWINSZ ioctl. It makes sense
+**only when you are connecting your TTY emulator over a serial link.**
+
+When you are connected remotely over ssh, the TTY resize signal is sent in the
+SSH protocol, which informs the system that the tty was resized. Programs on the
+tty in turn get the SIGWINCH signal may handle it to redraw their screen to
+conform to the new size. Serial protocol (agetty) lacks this capability. When
+working over a serial line, run it e.g. as part of bash PROMPT_COMMAND, so that
+the system's idea of your TTY size stays more or less in-sync with true emulated
+TTY geometry. SIGWINCH-aware programs, such as vim, less or htop won't resize
+automatically (unless you explicitly run tty_resize from them), but will be at
+least read the new size on a next launch. This is probably as far as you can get
+over a serial tty connection.
+
+Build
+-----
+
+A single ~15KB executable file installs into /usr/local/bin by default.
+
+GNU Make:
+   make
+   sudo make install [ PREFIX=/instead_of/usr/local ]
+   make dist-clean
+
+CMake:
+   cmake -B Build
+   cmake --build Build
+   sudo cmake --install Build --strip [ --prefix=/instead_of/usr/local ]
+   rm -rf Build
+
+Historical record
+-----------------
+
+Salvaged and upgraded for modern C by kkm in 2019 from:
+http://web.archive.org/web/20081224152013/http://www.davehylands.com/gumstix-wiki/resize/resize.c
+Thanks to the answer https://unix.stackexchange.com/a/19265
+    kkm, December 2019
+
+ * * *
+
+This version of resize.c has been modified from the original, which
+came with X11/xterm.  It no longer tries to emit shell commands for
+setting LINES, COLUMNS, or TERMCAP.  It assumes an ANSI terminal,
+and the availability of the TIOCGWINSZ ioctl.  The portability
+ifdefs were also removed -- posix termios access is assumed.
+    Paul Fox, June 2006
+
+Copyright And License
+---------------------
+
+SPDX-License-Identifier: BSD-3-Clause
+
+Copyright 1987 Digital Equipment Corporation
+          2006 Paul Fox
+          2019 Cy "kkm" K'Nelson
+
+See the LICENSE file for full licenses and comments. The BSD 3-clause license
+was chosen specifically to comply with the terms of the original license.
